@@ -67,31 +67,19 @@ def buildImage():
 
   dst = Image.new( 'YCbCr', (width,height) )
   dstPixels = dst.load()
-  print srcPixels[100,7]
-  # Build destination image from source image
-  for i in range(width):
-    for j in range(height):
-        y,cb,cr = srcPixels[i,j]
-        h[y] += 1
 
   for i in range(width):
     for j in range(height):
-      hsum = 0
+
       # read source pixel
-
       y,cb,cr = srcPixels[i,j]
-      for x in range(0,y):
-          hsum += h[x]
+
       # ---- MODIFY PIXEL ----
-      # hist equalization
-      y = int((256*hsum/(width*height))-1)
-      newh[y] += 1
       #brightness
-      #y = int(factor * y)
+      y = int(factor * y)
       # write destination pixel (while flipping the image in the vertical direction)
 
       dstPixels[i,height-j-1] = (y,cb,cr)
-  print newh
   # Done
 
   return dst.convert( 'RGB' )
@@ -128,7 +116,43 @@ def display():
 
   glutSwapBuffers()
 
+def histogramEq():
+    global currentImg,h,newh
+    img = currentImg.convert( 'YCbCr' )
+    srcPixels = img.load()
 
+    width  = img.size[0]
+    height = img.size[1]
+
+    # Set up a new, blank image of the same size
+
+    dst = Image.new( 'YCbCr', (width,height) )
+    dstPixels = dst.load()
+    # Build destination image from source image
+    for i in range(width):
+      for j in range(height):
+          y,cb,cr = srcPixels[i,j]
+          h[y] += 1
+
+    for i in range(width):
+      for j in range(height):
+        hsum = 0
+        # read source pixel
+
+        y,cb,cr = srcPixels[i,j]
+        for x in range(0,y):
+            hsum += h[x]
+        # ---- MODIFY PIXEL ----
+        # hist equalization
+        y = int((256*hsum/(width*height))-1)
+        newh[y] += 1
+        # write destination pixel (while flipping the image in the vertical direction)
+        dstPixels[i,j] = (y,cb,cr)
+    print newh
+    # Done
+
+    currentImg = dst.convert( 'RGB' )
+    glutPostRedisplay()
 
 # Handle keyboard input
 
@@ -137,7 +161,8 @@ def keyboard( key, x, y ):
   if key == '\033': # ESC = exit
     sys.exit(0)
 
- # elif key == 'h':
+  elif key == 'h':
+      histogramEq()
 
 
   ##elif key == 'l':
@@ -224,7 +249,7 @@ def motion( x, y ):
   diffX = x - initX
   diffY = y - initY
 
-  global factor, contrast
+  global factor, contrast,currentImg
 
   factor = initFactor + diffX / float(windowWidth)
   print "factor"
@@ -234,7 +259,7 @@ def motion( x, y ):
   print contrast
   if factor < 0:
     factor = 0
-
+  currentImg = buildImage()
   glutPostRedisplay()
 
 # Store images
