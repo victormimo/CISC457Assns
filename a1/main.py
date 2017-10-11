@@ -73,7 +73,7 @@ def buildImage():
     for j in range(height):
 
       # read source pixel
-      
+
       y,cb,cr = srcPixels[i,j]
 
       # ---- MODIFY PIXEL ----
@@ -81,7 +81,7 @@ def buildImage():
       y = int(factor * y)
 
       # write destination pixel (while flipping the image in the vertical direction)
-      
+
       dstPixels[i,height-j-1] = (y,cb,cr)
 
   # Done
@@ -122,7 +122,7 @@ def display():
   glutSwapBuffers()
 
 
-  
+
 # Handle keyboard input
 
 def keyboard( key, x, y ):
@@ -163,7 +163,7 @@ def saveImage( path ):
 
   buildImage().save( path )
 
-  
+
 
 # Handle window reshape
 
@@ -226,9 +226,9 @@ def motion( x, y ):
     factor = 0
 
   glutPostRedisplay()
-  
 
-    
+
+
 # Run OpenGL
 
 glutInit()

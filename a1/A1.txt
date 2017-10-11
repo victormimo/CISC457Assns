@@ -37,7 +37,7 @@ groups of two.  Graduate students must work individually.
 6. Apply the filter to the whole image upon 'a' being pressed.  Use
    convolution as described in class (i.e. flipping the filter).
 
-7. Appy the filter within a radius, r, of the mouse when the RIGHT
+7. Apply the filter within a radius, r, of the mouse when the RIGHT
    mouse button is clicked or dragged.  Adjust r by pressing '+' (or
    '=') and '-' (or '_').  For each step that the mouse is dragged
    (i.e. each call to "motion"), the current image should be updated
@@ -49,7 +49,7 @@ In a single directory called 'a1' put the following files:
 
   README.txt - containing the name, student number, and netID of each
                person working on the assignment.  Include here any
-               comments you have for the TA. 
+               comments you have for the TA.
 
   main.py    - the modified code, well commented.
 
