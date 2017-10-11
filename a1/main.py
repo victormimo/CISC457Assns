@@ -31,6 +31,7 @@ factor = 1 # factor by which luminance is scaled
 
 h = [0]*256
 newh = [0]*256
+
 # Image directory and path to image file
 
 imgDir      = 'images'
@@ -108,7 +109,7 @@ def display():
 
   # rebuild the image
 
-  img = buildImage()
+  img = currentImg
   width  = img.size[0]
   height = img.size[1]
 
@@ -236,7 +237,9 @@ def motion( x, y ):
 
   glutPostRedisplay()
 
-
+# Store images
+#originalImg = buildImage()
+currentImg = buildImage()
 # Run OpenGL
 
 glutInit()
