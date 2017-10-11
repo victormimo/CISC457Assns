@@ -29,8 +29,8 @@ windowHeight =  800
 
 factor = 1 # factor by which luminance is scaled
 
-
-
+h = [0]*256
+newh = [0]*256
 # Image directory and path to image file
 
 imgDir      = 'images'
@@ -66,24 +66,31 @@ def buildImage():
 
   dst = Image.new( 'YCbCr', (width,height) )
   dstPixels = dst.load()
-
+  print srcPixels[100,7]
   # Build destination image from source image
+  for i in range(width):
+    for j in range(height):
+        y,cb,cr = srcPixels[i,j]
+        h[y] += 1
 
   for i in range(width):
     for j in range(height):
-
+      hsum = 0
       # read source pixel
 
       y,cb,cr = srcPixels[i,j]
-
+      for x in range(0,y):
+          hsum += h[x]
       # ---- MODIFY PIXEL ----
-
-      y = int(factor * y)
-
+      # hist equalization
+      y = int((256*hsum/(width*height))-1)
+      newh[y] += 1
+      #brightness
+      #y = int(factor * y)
       # write destination pixel (while flipping the image in the vertical direction)
 
       dstPixels[i,height-j-1] = (y,cb,cr)
-
+  print newh
   # Done
 
   return dst.convert( 'RGB' )
@@ -102,7 +109,6 @@ def display():
   # rebuild the image
 
   img = buildImage()
-
   width  = img.size[0]
   height = img.size[1]
 
@@ -129,6 +135,9 @@ def keyboard( key, x, y ):
 
   if key == '\033': # ESC = exit
     sys.exit(0)
+
+ # elif key == 'h':
+
 
   ##elif key == 'l':
   ##  path = tkFileDialog.askopenfilename( initialdir = imgDir )
@@ -226,7 +235,6 @@ def motion( x, y ):
     factor = 0
 
   glutPostRedisplay()
-
 
 
 # Run OpenGL
