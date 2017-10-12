@@ -43,10 +43,10 @@ imgPath = os.path.join( imgDir, imgFilename )
 
 # File dialog
 
-#import Tkinter, tkFileDialog
+import Tkinter, tkFileDialog
 
-#root = Tkinter.Tk()
-#root.withdraw()
+root = Tkinter.Tk()
+root.withdraw()
 
 
 
@@ -149,6 +149,8 @@ def histogramEq():
         # write destination pixel (while flipping the image in the vertical direction)
         dstPixels[i,j] = (y,cb,cr)
     print newh
+    h = [0]*256
+    newh = [0]*256
     # Done
 
     currentImg = dst.convert( 'RGB' )
@@ -165,15 +167,15 @@ def keyboard( key, x, y ):
       histogramEq()
 
 
-  ##elif key == 'l':
-  ##  path = tkFileDialog.askopenfilename( initialdir = imgDir )
- ##   if path:
-     ## loadImage( path )
+  elif key == 'l':
+    path = tkFileDialog.askopenfilename( initialdir = imgDir )
+    if path:
+      loadImage( path )
 
- ## elif key == 's':
-  ##  outputPath = tkFileDialog.asksaveasfilename( initialdir = '.' )
-  ##  if outputPath:
-##      saveImage( outputPath )
+  elif key == 's':
+     outputPath = tkFileDialog.asksaveasfilename( initialdir = '.' )
+     if outputPath:
+       saveImage( outputPath )
 
   else:
     print 'key =', key    # DO NOT REMOVE THIS LINE.  It will be used during automated marking.
@@ -191,8 +193,12 @@ def keyboard( key, x, y ):
 
 def loadImage( path ):
 
-  global imgPath
+  global imgPath, currentImg
   imgPath = path
+  currentImg = buildImage()
+  glutPostRedisplay()
+
+
 
 def saveImage( path ):
 
@@ -262,7 +268,7 @@ def motion( x, y ):
   currentImg = buildImage()
   glutPostRedisplay()
 
-# Store images
+# Store global images
 #originalImg = buildImage()
 currentImg = buildImage()
 # Run OpenGL
