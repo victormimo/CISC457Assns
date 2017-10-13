@@ -28,6 +28,7 @@ windowWidth  = 600 # window dimensions
 windowHeight =  800
 
 factor = 1 # factor by which luminance is scaled
+contrast = 1
 
 h = [0]*256
 newh = [0]*256
@@ -76,9 +77,10 @@ def buildImage():
 
       # ---- MODIFY PIXEL ----
       #brightness
-      y = int(factor * y)
+      y = int(contrast * y + 10*factor)
       # write destination pixel (while flipping the image in the vertical direction)
-
+      if y < 0 : y = 0
+      elif y > 255: y = 255
       dstPixels[i,height-j-1] = (y,cb,cr)
   # Done
 
@@ -115,6 +117,7 @@ def display():
   glDrawPixels( width, height, GL_RGB, GL_UNSIGNED_BYTE, imageData )
 
   glutSwapBuffers()
+
 
 def histogramEq():
     global currentImg,h,newh
@@ -225,7 +228,7 @@ button = None
 initX = 0
 initY = 0
 initFactor = 0
-initFac = 0
+initFac = 1
 
 
 
@@ -260,11 +263,13 @@ def motion( x, y ):
   factor = initFactor + diffX / float(windowWidth)
   print "factor"
   print factor
-  contrast = initFac + diffY/ float(windowHeight)
+  contrast = initFac - diffY/ float(windowHeight)
   print "contrast"
   print contrast
   if factor < 0:
     factor = 0
+  if contrast < 0:
+      contrast=0
   currentImg = buildImage()
   glutPostRedisplay()
 
