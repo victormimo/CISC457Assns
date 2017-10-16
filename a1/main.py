@@ -38,10 +38,6 @@ imgFilename = 'mandrill.png'
 
 imgPath = os.path.join(imgDir, imgFilename)
 
-# Filter loading globals
-filterDir = 'filters'
-filterFilename = 'box3'
-
 # File dialog
 
 import Tkinter, tkFileDialog
@@ -171,7 +167,9 @@ def convolutionFilter():
                     conv = int(conv)
                     convolvePix[i, j] = conv
 
+            #write destination pixel (while flipping image in vertical direction)
             dstPixels[i, height - j - 1] = convolvePix[i, j], cb, cr
+
             currentImg = dst.convert('RGB')
             glutPostRedisplay()
 
@@ -222,14 +220,13 @@ def histogramEq():
 # Loading Filter
 
 def loadFilter():
-    # global filterDir, filterFilename
+
     filterDir = 'filters'
-    filterFilename = 'box3'
 
     filterPath = os.path.join(filterDir, filterFilename)
     print filterPath
 
-    filterName = tkFileDialog.askopenfilename(initialdir=filterDir)
+    filterFileName = tkFileDialog.askopenfilename(initialdir=filterDir)
     with open(filterName, 'r') as data:
         content = data.readlines()
 
