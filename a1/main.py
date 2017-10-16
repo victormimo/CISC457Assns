@@ -40,7 +40,9 @@ imgFilename = 'mandrill.png'
 
 imgPath = os.path.join( imgDir, imgFilename )
 
-
+# Filter loading globals
+filterDir = 'filters'
+filterFilename = 'box3'
 
 # File dialog
 
@@ -75,6 +77,9 @@ def buildImage():
       # read source pixel
       y,cb,cr = srcPixels[i,j]
 
+      #convolution filter  set up
+
+
       # ---- MODIFY PIXEL ----
       #brightness
       y = int(contrast * y + 10*factor)
@@ -85,8 +90,6 @@ def buildImage():
   # Done
 
   return dst.convert( 'RGB' )
-
-
 
 # Set up the display and draw the current image
 
@@ -104,20 +107,61 @@ def display():
   height = img.size[1]
 
   # Find where to position lower-left corner of image
-
+    #what does this mean?
   baseX = (windowWidth-width)/2
   baseY = (windowHeight-height)/2
 
   glWindowPos2i( baseX, baseY )
 
   # Get pixels and draw
-
   imageData = numpy.array( list( img.getdata() ), numpy.uint8 )
 
   glDrawPixels( width, height, GL_RGB, GL_UNSIGNED_BYTE, imageData )
 
   glutSwapBuffers()
 
+# Convolution Filter
+'''
+def convolutionFilter():
+    global currentImg, filterData
+    img = currentImg.convert( 'YCbCr' )
+    srcPixels = img.load()
+    width = img.size[0]
+    height = img.size[1]
+
+    # Set up a new, blank image of the same size
+    dst = Image.new('YCbCr', (width, height))
+    dstPixels = dst.load()
+
+    # Set up pixels for convo
+    convolvePix = numpy.zeros([width, height])
+
+    #this loop is just to set up convol
+    for i in range(width):
+        for j in range(height):
+            #read source pixels
+            y, cb, cr = srcPixels[i, j]
+            convolvePix[i,j] = y
+
+    #build destination img from src img
+    for i in range(width):
+        for j in range(height):
+            #read source pixels
+            y, cb, cr = srcPixels[i, j]
+
+            # ---- MODIFY PIXEL ----
+            # convolution
+            sum = 0
+            yRadius = (filterData.shape[0]-1)/2
+            xRadius = (filterData.shape[1]-1)/2
+            for k in range(0, filterData.shape[1]):
+                for p in range(0, filterData.shape[0]):
+                    if ((i + k - xRadius) >= 0) and  ((j+p - yRadius) < height) and ((i+k - xRadius) < width) and ((j + p - yRadius) >= 0):
+                        sum = sum + convolvePix[i+k-xRadius, j+p-yRadius]*filterData[k, p]
+
+'''
+
+# Histogram eq
 
 def histogramEq():
     global currentImg,h,newh
@@ -136,7 +180,7 @@ def histogramEq():
       for j in range(height):
           y,cb,cr = srcPixels[i,j]
           h[y] += 1
-
+    print h
     for i in range(width):
       for j in range(height):
         hsum = 0
@@ -159,6 +203,29 @@ def histogramEq():
     currentImg = dst.convert( 'RGB' )
     glutPostRedisplay()
 
+# Loading Filter
+
+def loadFilter():
+
+    filterPath = os.path.join(filterDir, filterFilename)
+    print filterPath
+
+    filterName =  tkFileDialog.askopenfilename(filterPath, 'r')
+    content = filterName.readlines()
+    print content
+
+    [xdim, ydim] = content[0].split()
+    [xdim, ydim] = [int(xdim), (int)ydim]
+    scaleFactor = float(content[1].split()[0])
+    filterData = numpy.zeros([ ydim, xdim])
+
+    for i in range(0, ydim):
+        for j in range(0, xdim):
+            filterData[i,j] = scaleFactor*float(content[i+1].split[j]) ##SOMETHING IS WRONG HERE
+
+    print filterFilename, filterData
+    return filterData
+
 # Handle keyboard input
 
 def keyboard( key, x, y ):
@@ -169,7 +236,6 @@ def keyboard( key, x, y ):
   elif key == 'h':
       histogramEq()
 
-
   elif key == 'l':
     path = tkFileDialog.askopenfilename( initialdir = imgDir )
     if path:
@@ -179,7 +245,10 @@ def keyboard( key, x, y ):
      outputPath = tkFileDialog.asksaveasfilename( initialdir = '.' )
      if outputPath:
        saveImage( outputPath )
-
+  elif key == 'f':
+      loadFilter()
+  elif key == 'e':
+      convolutionFilter()
   else:
     print 'key =', key    # DO NOT REMOVE THIS LINE.  It will be used during automated marking.
 
@@ -261,11 +330,11 @@ def motion( x, y ):
   global factor, contrast,currentImg
 
   factor = initFactor + diffX / float(windowWidth)
-  print "factor"
-  print factor
+  #print "factor"
+  #print factor
   contrast = initFac - diffY/ float(windowHeight)
-  print "contrast"
-  print contrast
+  #print "contrast"
+  #print contrast
   if factor < 0:
     factor = 0
   if contrast < 0:
