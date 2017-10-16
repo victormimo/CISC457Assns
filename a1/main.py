@@ -132,10 +132,10 @@ def convolutionFilter():
     dst = Image.new('YCbCr', (width, height))
     dstPixels = dst.load()
 
-    # Set up pixels for convo
+    # Set up pixels for convolution
     convolvePix = numpy.zeros([width, height])
 
-    # this loop is just to set up convol
+    # this loop is just to set up initial values
     for i in range(width):
         for j in range(height):
             # read source pixels
@@ -150,26 +150,26 @@ def convolutionFilter():
 
             # ---- MODIFY PIXEL ----
             # convolution
-            sum = 0
+            conv = 0
             yRadius = (filterData.shape[0] - 1) / 2
             xRadius = (filterData.shape[1] - 1) / 2
             for k in range(0, filterData.shape[1]):
                 for p in range(0, filterData.shape[0]):
                     if ((i + k - xRadius) >= 0) and ((j + p - yRadius) < height) and ((i + k - xRadius) < width) and (
                         (j + p - yRadius) >= 0):
-                        sum = sum + convolvePix[i + k - xRadius, j + p - yRadius] * filterData[k, p]
-            print sum
+                        conv = conv + convolvePix[i + k - xRadius, j + p - yRadius] * filterData[k, p]
+            print conv
 
-            if (sum < 0):
-                sum = 0
-            elif (sum > 255):
-                sum = 255
+            if (conv < 0):
+                conv = 0
+            elif (conv > 255):
+                conv = 255
             else:
-                if (sum % 1) > 0.5:
-                    sum = int(sum) + 1
+                if (conv % 1) > 0.5:
+                    conv = int(conv) + 1
                 else:
-                    sum = int(sum)
-                    convolvePix[i, j] = sum
+                    conv = int(conv)
+                    convolvePix[i, j] = conv
 
             dstPixels[i, height - j - 1] = convolvePix[i, j], cb, cr
             currentImg = dst.convert('RGB')
