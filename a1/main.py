@@ -158,7 +158,7 @@ def convolutionFilter():
                     if ((i + k - xRadius) >= 0) and ((j + p - yRadius) < height) and ((i + k - xRadius) < width) and (
                         (j + p - yRadius) >= 0):
                         conv = conv + convolvePix[i + k - xRadius, j + p - yRadius] * filterData[k, p]
-            print conv
+
 
             if (conv < 0):
                 conv = 0
@@ -174,7 +174,7 @@ def convolutionFilter():
             dstPixels[i, height - j - 1] = convolvePix[i, j], cb, cr
             currentImg = dst.convert('RGB')
             glutPostRedisplay()
-
+    print 'Done conv'
 
 # Histogram eq
 
