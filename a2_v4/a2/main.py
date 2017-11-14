@@ -109,10 +109,15 @@ def inverseFT( image ):
 
 
 def multiplyFTs( image, filter ):
+  newImage = np.copy(image)
+  newImage = image*filter
+  width = image.shape[1]
+  height = image.shape[0]
+  for i in range(width):
+      for j in range(height):
+          newImage[j,i] = newImage[j,i]*((-1)**(i+j))
 
-  # YOUR CODE HERE
-
-  return image # (this is wrong)
+  return newImage
 
 # Set up the display and draw the current image
 
@@ -410,6 +415,7 @@ def keyboard( key, x, y ):
 
   elif key == 'x' and filterFT is not None and imageFT is not None:
     productFT = multiplyFTs( imageFT, filterFT )
+
 
   elif key == '+' or key == '=':
     radius = radius + 2
