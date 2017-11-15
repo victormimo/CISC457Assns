@@ -78,12 +78,27 @@ def ft1D( signal ):
 # Output is the same.
 
 def forwardFT( image ):
+    row1 = image.shape[0]
+    column1 = image.shape[1]
 
+    imc = image.copy()
+    i = 0
+    for row in imc:
+       imc[i] = ft1D(row)
+       i+=1
+    print "Row FourierT"
+    print imc
+
+    i = 0
+    for column in imc.T:
+       imc.T[i] = ft1D(column)
+       i += 1
+    print "Full FT"
+    print imc
   # YOUR CODE HERE
   #
   # You must replace this code with your own, keeping the same function name are parameters.
-
-  return np.fft.fft2( image )
+    return imc
 
 # Do an inverse FT
 #
