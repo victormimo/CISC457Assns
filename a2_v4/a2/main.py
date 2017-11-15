@@ -1,3 +1,4 @@
+#!/bin/env python2.7
 # Image manipulation
 #
 # You'll need Python 2.7 and must install these packages:
@@ -87,14 +88,12 @@ def forwardFT( image ):
        imc[i] = ft1D(row)
        i+=1
     print "Row FourierT"
-    print imc
 
     i = 0
     for column in imc.T:
        imc.T[i] = ft1D(column)
        i += 1
     print "Full FT"
-    print imc
   # YOUR CODE HERE
   #
   # You must replace this code with your own, keeping the same function name are parameters.
