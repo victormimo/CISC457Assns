@@ -99,6 +99,14 @@ def forwardFT( image ):
   # You must replace this code with your own, keeping the same function name are parameters.
     return imc
 
+def ift1D( signal ):
+
+  conjugateF = np.conj(signal)
+  transform = ft1D(conjugateF)
+  multiply = transform * (1.0 / signal.shape[0])  # multiply by 1 / N
+
+  return np.conj(multiply)
+
 # Do an inverse FT
 #
 # Input is a 2D numpy array of complex values.
@@ -110,7 +118,20 @@ def inverseFT( image ):
   #
   # You must replace this code with your own, keeping the same function name are parameters.
 
-  return np.fft.ifft2( image )
+  imc = image.copy()
+  i = 0
+  for row in imc:
+    imc[i] = ift1D(row)
+    i += 1
+  print "Row Inverse FourierT"
+
+  i = 0
+  for column in imc.T:
+    imc.T[i] = ift1D(column)
+    i += 1
+  print "Full FT"
+
+  return imc
 
 # Multiply two FTs
 #
