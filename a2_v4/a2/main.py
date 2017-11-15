@@ -83,29 +83,34 @@ def forwardFT( image ):
     column1 = image.shape[1]
 
     imc = image.copy()
-    i = 0
+    counter = 0
     for row in imc:
-       imc[i] = ft1D(row)
-       i+=1
+       imc[counter] = ft1D(row)
+       counter+=1
     print "Row FourierT"
 
-    i = 0
-    for column in imc.T:
-       imc.T[i] = ft1D(column)
-       i += 1
+    counter2 = 0
+    imc2 = imc.T
+    for column in imc2:
+       imc.T[counter2] = ft1D(column)
+       counter2 += 1
     print "Full FT"
   # YOUR CODE HERE
   #
   # You must replace this code with your own, keeping the same function name are parameters.
     return imc
 
-def ift1D( signal ):
+def iFT1D( signal ):
 
-  conjugateF = np.conj(signal)
-  transform = ft1D(conjugateF)
-  multiply = transform * (1.0 / signal.shape[0])  # multiply by 1 / N
+  conjFT = np.conj(signal)
 
-  return np.conj(multiply)
+  #print conjFT
+  transFT = ft1D(conjFT)
+
+  #multiplying by 1/number of rows
+  res = transFT * (1.0 / signal.shape[0])
+
+  return np.conj(res)
 
 # Do an inverse FT
 #
@@ -114,24 +119,24 @@ def ift1D( signal ):
 
 def inverseFT( image ):
 
+
+    imc = image.copy()
+    counter = 0
+    for row in imc:
+       imc[counter] = iFT1D(row)
+       counter+=1
+    print "Row FourierT"
+
+    counter2 = 0
+    imc2 = imc.T
+    for column in imc2:
+       imc.T[counter2] = iFT1D(column)
+       counter2 += 1
+    print "Full FT"
   # YOUR CODE HERE
   #
   # You must replace this code with your own, keeping the same function name are parameters.
-
-  imc = image.copy()
-  i = 0
-  for row in imc:
-    imc[i] = ift1D(row)
-    i += 1
-  print "Row Inverse FourierT"
-
-  i = 0
-  for column in imc.T:
-    imc.T[i] = ift1D(column)
-    i += 1
-  print "Full FT"
-
-  return imc
+    return imc
 
 # Multiply two FTs
 #
