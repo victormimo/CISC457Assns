@@ -1,4 +1,4 @@
-data = "aabbaabababbaaaaaba"
+data = [1,1,1,1,2,1,3,2,1,3,2,1,2,2,2,3]
 
 
 def compress(uncompressed):
@@ -9,11 +9,10 @@ def compress(uncompressed):
     dictionary = dict((chr(i), i) for i in xrange(dict_size))
 
     # in Python 3: dictionary = {chr(i): i for i in range(dict_size)}
-
     w = ""
     result = []
     for c in uncompressed:
-        wc = w + c
+        wc = w + str(c)
         if wc in dictionary:
             w = wc
         else:
@@ -21,7 +20,7 @@ def compress(uncompressed):
             # Add wc to the dictionary.
             dictionary[wc] = dict_size
             dict_size += 1
-            w = c
+            w = str(c)
 
     # Output the code for w.
     if w:
@@ -58,8 +57,8 @@ def decompress(compressed):
         w = entry
     return result.getvalue()
 
-result = compress(data)
-
-print result
-print len(data), len(result)
-print decompress(result)
+result  = compress(data)
+# print result
+# print len(data), len(result)
+x = str(1)+str(4)
+print ord('244')
