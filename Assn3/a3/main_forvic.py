@@ -20,8 +20,6 @@ import numpy as np
 
 headerText = 'my compressed image - v1.0'
 
-
-
 # Compress an image
 
 
@@ -35,77 +33,58 @@ def compress( inputFile, outputFile ):
   # integer.
 
   img = netpbm.imread( inputFile ).astype('uint8')
-  
+
   # Compress the image
   #
   # REPLACE THIS WITH YOUR OWN CODE TO FILL THE 'outputBytes' ARRAY.
   startTime = time.time()
-
   dictionary = {} # create a dictionary
-  dictionarySize = 0
-  # pre-fill dictionary with single characters
+  dictsize = 0
   for i in range(-255, 256):
-    dictionary[str(i)] = dictionarySize
-    dictionarySize += 1
-  # print dictionary
+    dictionary[str(i)] = dictsize
+    dictsize += 1
 
-  numChannels = img.shape[2]
-  outputBytesChannels = [[]]*numChannels # create an array of arrays to store channel intensities separately
-  outputBytesList = []
-  
- 
+  channelsN = img.shape[2]
+  outputlist = []
   outputBytes = bytearray()
   listSize = 0
   for y in range(img.shape[0]):
     for x in range(img.shape[1]):
-      for c in range(numChannels):
-        # outputBytes.append( img[y,x,c] )
-        outputBytesChannels[c].append( img[y,x,c] )
-        outputBytesList.append(img[y,x,c])
+      for c in range(channelsN):
+        outputlist.append(img[y,x,c])
         listSize += 1
-
-  previous = ''
-  current = outputBytesList[0]
-  previous = str(int(current))
-  # loop through list of intensities
+  print listSize, sys.getsizeof(outputlist)
+  lastStr = ''
+  current = outputlist[0]
+  lastStr = str(int(current))
   for i in range(1, listSize):
-    
-    # if dictionary reaches size limit, clear it and start it again
-    if dictionarySize >= 65536:
+    if dictsize >= 65536:
       dictionary = {} # create a dictionary
-      dictionarySize = 0
-      # pre-fill dictionary with single characters
+      dictsize = 0
       for i in range(-255, 256):
-        dictionary[str(i)] = dictionarySize
-        dictionarySize += 1
+        dictionary[str(i)] = dictsize
+        dictsize += 1
 
-    current = outputBytesList[i]
-    entry = previous+","+str(int(current))
+    current = outputlist[i]
+    entry = lastStr+","+str(int(current))
     if entry in dictionary:
-      previous = entry
+      lastStr = entry
     else:
-      # if dictionarySize < 65536: # limit of dictionary
-      output16bits = dictionary[previous]
-      outputLow8bits = output16bits & 0xFF
-      outputHigh8bits = (output16bits >> 8) & 0xFF
-      # append the 16 digit bit string in 2 steps, first low 8 bits and then high 8 bits
-      # this is because it is a bytearray
-      outputBytes.append(outputLow8bits)
-      outputBytes.append(outputHigh8bits)
-      # add to dictionary
-      dictionary[entry] = dictionarySize
-      dictionarySize += 1
-      previous = str(int(current))
+      outBits = dictionary[lastStr]
+      outLow = outBits & 0xFF
+      outHigh = (outBits >> 8) & 0xFF
+      outputBytes.append(outLow)
+      outputBytes.append(outHigh)
+      dictionary[entry] = dictsize
+      dictsize += 1
+      lastStr = str(int(current))
 
-  # final check
-  if previous in dictionary:
-    output16bits = dictionary[previous]
-    outputLow8bits = output16bits & 0xFF
-    outputHigh8bits = (output16bits >> 8) & 0xFF
-    # append the 16 digit bit string in 2 steps, first low 8 bits and then high 8 bits
-    # this is because it is a bytearray
-    outputBytes.append(outputLow8bits)
-    outputBytes.append(outputHigh8bits)
+  if lastStr in dictionary:
+    outBits = dictionary[lastStr]
+    outLow = outBits & 0xFF
+    outHigh = (outBits >> 8) & 0xFF
+    outputBytes.append(outLow)
+    outputBytes.append(outHigh)
 
 
   endTime = time.time()
@@ -119,9 +98,6 @@ def compress( inputFile, outputFile ):
   outputFile.write( '%s\n'       % headerText )
   outputFile.write( '%d %d %d\n' % (img.shape[0], img.shape[1], img.shape[2]) )
   outputFile.write( outputBytes )
-
-  # Print information about the compression
-  
   inSize  = img.shape[0] * img.shape[1] * img.shape[2]
   outSize = len(outputBytes)
 
@@ -129,7 +105,7 @@ def compress( inputFile, outputFile ):
   sys.stderr.write( 'Output size:        %d bytes\n' % outSize )
   sys.stderr.write( 'Compression factor: %.2f\n' % (inSize/float(outSize)) )
   sys.stderr.write( 'Compression time:   %.2f seconds\n' % (endTime - startTime) )
-  
+
 
 
 # Uncompress an image
@@ -141,112 +117,78 @@ def uncompress( inputFile, outputFile ):
   if inputFile.readline() != headerText + '\n':
     sys.stderr.write( "Input is not in the '%s' format.\n" % headerText )
     sys.exit(1)
-    
-  # Read the rows, columns, and channels.  
+
+  # Read the rows, columns, and channels.
 
   rows, columns, channels = [ int(x) for x in inputFile.readline().split() ]
 
-  # Read the raw bytes.
-  inputBytes = bytearray(inputFile.read())
-  rangeLength = len(inputBytes)/2 # divide by 2 because every 2 bytes is 1 item
   # print inputBytes
   # Build the image
   #
   # REPLACE THIS WITH YOUR OWN CODE TO CONVERT THE 'inputBytes' ARRAY INTO AN IMAGE IN 'img'.
-
+  inputBytes = bytearray(inputFile.read())
+  inputlen = len(inputBytes)/2
   startTime = time.time()
 
-  # outputBytes = bytearray() # create an output bytes array
   result = []
-
-  # initialize the dictionary in the opposite was as compress and use an array as the value
-  dictionary = {} # create a dictionary
-  dictionarySize = 0
-  # pre-fill dictionary with single characters
+  dictionary = {}
+  dictsize = 0
   for i in range(-255, 256):
-    dictionary[dictionarySize] = [i]
-    dictionarySize += 1
+    dictionary[dictsize] = [i]
+    dictsize += 1
 
   img = np.empty( [rows,columns,channels], dtype=np.uint8 )
 
   byteIter = iter(inputBytes)
-  byteCurrent = byteIter.next()
-  byteNext = byteIter.next()
-  # put together the two bytes to get the 16-bit phrase
-  phrase = (byteNext << 8) + byteCurrent # this is done by shifting next into the higher slot
-  previous = dictionary[phrase]
-  result.append(previous)
+  currentbyte = byteIter.next()
+  nextbyte = byteIter.next()
+  phrase = (nextbyte << 8) + currentbyte
+  lastStr = dictionary[phrase]
+  result.append(lastStr)
 
-  for i in range(1, rangeLength):
-    
+  for i in range(1, inputlen):
+
     # again reset the dictionary if it reaches the limit
-    if dictionarySize >= 65536:
+    if dictsize >= 65536:
       dictionary = {} # create a dictionary
-      dictionarySize = 0
+      dictsize = 0
       # pre-fill dictionary with single characters
       for i in range(-255, 256):
-        dictionary[dictionarySize] = [i]
-        dictionarySize += 1
+        dictionary[dictsize] = [i]
+        dictsize += 1
 
-    byteCurrent = byteIter.next()
-    byteNext = byteIter.next()
-    phrase = (byteNext << 8) + byteCurrent
-
+    currentbyte = byteIter.next()
+    nextbyte = byteIter.next()
+    phrase = (nextbyte << 8) + currentbyte
     if phrase in dictionary:
       entry = dictionary[phrase]
     else:
       entry = []
-      for j in previous:
+      for j in lastStr:
         entry.append(j)
-      entry.append(previous[0])
-      # entry = [previous + [previous[0]]]
-
+      entry.append(lastStr[0])
     temp = []
-    for j in previous:
+    for j in lastStr:
       temp.append(j)
-    temp.append(previous[0])
-    dictionary[dictionarySize] = temp
-    dictionarySize += 1
-
+    temp.append(lastStr[0])
+    dictionary[dictsize] = temp
+    dictsize += 1
     for k in range(len(entry)):
       result.append(entry[k])
-
-    previous = entry
-
-
-
-  # print dictionary
-  # print outputBytes
-  # byteIter2 = iter(outputBytes)
+    lastStr = entry
   imgSize = rows*columns*channels
   counter = 1
   for y in range(rows):
     for x in range(columns):
       for c in range(channels):
         if (counter < len(result)):
-          # print counter
-          # print result[counter]
           img[y,x,c] = result[counter]
         counter += 1
-        # print img[y,x,c]
-  
-
-      
-
-  # print img[0]
-
   endTime = time.time()
-
-  # Output the image
-
   netpbm.imsave( outputFile, img )
-
   sys.stderr.write( 'Uncompression time: %.2f seconds\n' % (endTime - startTime) )
 
-    
-
-  
-# The command line is 
+# The command line is
 #
 #   main.py {flag} {input image filename} {output image filename}
 #
@@ -259,7 +201,7 @@ if len(sys.argv) < 4:
   sys.exit(1)
 
 # Get input file
- 
+
 if sys.argv[2] == '-':
   inputFile = sys.stdin
 else:
